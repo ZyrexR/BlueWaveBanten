@@ -1,0 +1,254 @@
+/* --- Global Styles & Fonts --- */
+body {
+    /* Base font for all pages */
+    font-family: 'Poppins', sans-serif;
+}
+
+/* --- Authentication Pages Styles (Login, Register) --- */
+.auth-bg {
+    /* For Login and Register page body */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+.auth-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+}
+
+/* --- Dashboard Styles --- */
+.dashboard-bg {
+    /* For Dashboard page body */
+    background-color: #f8fafc;
+}
+.sidebar {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+.nav-item {
+    position: relative;
+    transition: all 0.2s ease-in-out;
+    color: #dbeafe;
+}
+.nav-item.active, .nav-item:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: white;
+}
+.nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 70%;
+    background-color: white;
+    border-radius: 0 4px 4px 0;
+}
+.content-section {
+    display: none;
+    animation: fadeIn 0.3s ease-out;
+}
+.content-section.active {
+    display: block;
+}
+.card-hover:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+.qr-code {
+    width: 200px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    border-radius: 8px;
+    background-color: white;
+    padding: 10px;
+}
+#map {
+    height: 400px;
+    border-radius: 12px;
+    z-index: 1;
+}
+.leaflet-popup-content {
+    font-family: 'Poppins', sans-serif;
+}
+.weather-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+.payment-method.selected {
+    border-color: #3b82f6;
+    background-color: #eff6ff;
+}
+.datepicker-input {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #374151;
+    background-color: #fff;
+    transition: all 0.2s ease-in-out;
+}
+.datepicker-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+/* --- Animation Styles (Shared) --- */
+.notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+/* Notification style for auth pages (simpler) */
+.auth-bg .notification {
+    animation: slideIn 0.3s ease-out;
+    background-color: #4CAF50; /* Base color, will be overridden by type */
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    min-width: 250px;
+}
+/* Notification style for dashboard (complex with fadeOut) */
+.dashboard-bg .notification {
+    animation: slideIn 0.3s ease-out, fadeOut 0.5s ease-in 4s forwards;
+    background-color: #4CAF50; /* Base color, will be overridden by type */
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    min-width: 250px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; transform: translateX(100%); }
+}
+
+/* --- Utility/Component Styles --- */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+.badge-success { background-color: #dcfce7; color: #166534; }
+.badge-warning { background-color: #fef3c7; color: #92400e; }
+.badge-error { background-color: #fee2e2; color: #991b1b; }
+.badge-info { background-color: #dbeafe; color: #1e40af; }
+
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Tambahkan ini ke file styles.css yang sudah ada */
+
+/* Additional styles for user dashboard */
+.wisata-card {
+    transition: all 0.3s ease;
+}
+
+.wisata-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.btn-favorite {
+    transition: all 0.2s ease;
+}
+
+.btn-favorite:hover {
+    transform: scale(1.1);
+}
+
+.payment-method {
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.payment-method:hover {
+    border-color: #3b82f6;
+    transform: translateY(-2px);
+}
+
+.counter-btn {
+    transition: all 0.2s ease;
+}
+
+.counter-btn:hover {
+    background-color: #e5e7eb;
+}
+
+.counter-btn:active {
+    transform: scale(0.95);
+}
+
+/* Progress bar animation */
+#progressBar {
+    transition: width 0.5s ease-in-out;
+}
+
+/* Loading states */
+.loading {
+    display: inline-block;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .wisata-card {
+        margin-bottom: 1rem;
+    }
+    
+    .payment-method {
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}

@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard User - BlueWave Banten</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Leaflet Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- QR Code Library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode.js/qrcode.min.js"></script>
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="assets/css/styles.css">
+    
+    <style>
+        /* Custom styles untuk dashboard */
+        .dashboard-bg {
+            background-color: #f8fafc;
+        }
+        .sidebar {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+        .nav-item {
+            transition: all 0.2s ease-in-out;
+            color: #dbeafe;
+        }
+        .nav-item:hover, .nav-item.active {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 70%;
+            background-color: white;
+            border-radius: 0 4px 4px 0;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        #map {
+            height: 400px;
+            border-radius: 12px;
+            z-index: 1;
+        }
+        .payment-method.selected {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        .step-indicator.active .step-number {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .step-indicator.completed .step-number {
+            background-color: #10b981;
+            color: white;
+        }
+    </style>
+</head>
+<body class="dashboard-bg" style="font-family: 'Poppins', sans-serif;">
+    <div class="flex h-screen">
+        <!-- Sidebar Navigation -->
+        <div class="w-64 sidebar text-white shadow-xl">
+            <div class="p-6">
+                <div class="flex items-center space-x-3 mb-8">
+                    <img src="https://www.bluewavebanten.my.id/assets/images/logo_bluewave.png" alt="Logo" class="w-10 h-10">
+                    <div>
+                        <h1 class="text-xl font-bold">BlueWave Banten</h1>
+                        <p class="text-sm opacity-80">User Dashboard</p>
+                    </div>
+                </div>
+
+                <nav class="space-y-2">
+                    <a href="#" class="nav-item flex items-center space-x-3 p-3 rounded-lg active" data-section="beranda">
+                        <i class="fas fa-home w-5"></i>
+                        <span>Beranda</span>
+                    </a>
+                    <a href="#" class="nav-item flex items-center space-x-3 p-3 rounded-lg" data-section="wisata">
+                        <i class="fas fa-umbrella-beach w-5"></i>
+                        <span>Daftar Wisata</span>
+                    </a>
+                    <a href="#" class="nav-item flex items-center space-x-3 p-3 rounded-lg" data-section="pembelian">
+                        <i class="fas fa-ticket-alt w-5"></i>
+                        <span>Pembelian Tiket</span>
+                    </a>
+                    <a href="#" class="nav-item flex items-center space-x-3 p-3 rounded-lg" data-section="tiket-saya">
+                        <i class="fas fa-receipt w-5"></i>
+                        <span>Tiket Saya</span>
+                    </a>
+                    <a href="#" class="nav-item flex items-center space-x-3 p-3 rounded-lg" data-section="riwayat">
+                        <i class="fas fa-history w-5"></i>
+                        <span>Riwayat</span>
+                    </a>
+                    <a href="#" class="nav-item flex items-center space-x-3 p-3 rounded-lg" data-section="favorit">
+                        <i class="fas fa-heart w-5"></i>
+                        <span>Favorit Saya</span>
+                    </a>
+                    <a href="#" class="nav-item flex items-center space-x-3 p-3 rounded-lg" data-section="review">
+                        <i class="fas fa-star w-5"></i>
+                        <span>Review & Rating</span>
+                    </a>
+                    <a href="#" class="nav-item flex items-center space-x-3 p-3 rounded-lg" data-section="bantuan">
+                        <i class="fas fa-question-circle w-5"></i>
+                        <span>Bantuan</span>
+                    </a>
+                    <a href="#" class="nav-item flex items-center space-x-3 p-3 rounded-lg" data-section="profil">
+                        <i class="fas fa-user w-5"></i>
+                        <span>Profil</span>
+                    </a>
+                </nav>
+            </div>
+            
+            <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-blue-400">
+                <div class="text-center">
+                    <p class="font-semibold" id="sidebarUserName">User</p>
+                    <p class="text-sm opacity-80" id="sidebarUserEmail">user@bluewave.com</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="bg-white shadow-sm border-b border-gray-200 py-4 px-6 flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-gray-800" id="pageTitle">Beranda</h2>
+                <div class="flex items-center space-x-4">
+                    <!-- Notifications -->
+                    <div class="relative">
+                        <button id="notificationButton" class="text-gray-600 hover:text-blue-600 transition relative">
+                            <i class="fas fa-bell text-lg"></i>
+                            <span id="notificationCount" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+                        </button>
+                        <div id="notificationDropdown" class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 hidden z-50">
+                            <div class="p-4 border-b border-gray-200">
+                                <h3 class="font-semibold text-gray-800">Notifikasi</h3>
+                            </div>
+                            <div id="notificationList" class="max-h-60 overflow-y-auto p-2">
+                                <div class="text-center py-4 text-gray-500">
+                                    <i class="fas fa-bell-slash text-2xl mb-2"></i>
+                                    <p>Tidak ada notifikasi</p>
+                                </div>
+                            </div>
+                            <div class="p-2 border-t border-gray-200 text-center">
+                                <button id="markAllRead" class="text-sm text-blue-600 hover:text-blue-800">Tandai semua sudah dibaca</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- User Info -->
+                    <div class="text-right">
+                        <p class="font-semibold text-gray-800" id="userName">User</p>
+                        <p class="text-sm text-gray-600" id="userEmail">user@bluewave.com</p>
+                    </div>
+                    <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold" id="userAvatar">
+                        U
+                    </div>
+                    <button id="logoutButton" class="text-gray-600 hover:text-red-600 transition">
+                        <i class="fas fa-sign-out-alt text-lg"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Main Content -->
+            <main class="flex-1 overflow-auto p-6">
+                <!-- Section: Beranda -->
+                <section id="beranda" class="content-section active">
+                    <!-- Welcome Banner -->
+                    <div class="bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl p-8 text-white shadow-lg mb-8">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                            <div>
+                                <h3 class="text-3xl font-bold mb-2">Selamat Datang, <span id="welcomeName">User</span>! 👋</h3>
+                                <p class="text-blue-100 text-lg">Jelajahi keindahan wisata bahari Banten dengan mudah</p>
+                                <div class="mt-6" id="currentWeather">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                                        <span>Memuat data cuaca...</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-right mt-6 md:mt-0">
+                                <p class="text-blue-100">Lokasi Anda:</p>
+                                <p class="font-semibold text-xl" id="userLocationText">Mendeteksi lokasi...</p>
+                                <button id="refreshLocation" class="mt-3 text-sm bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-full transition">
+                                    <i class="fas fa-sync-alt mr-2"></i>Refresh Lokasi
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white rounded-2xl p-6 shadow-lg card-hover">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-600 text-sm">Total Tiket</p>
+                                    <h4 class="text-3xl font-bold text-gray-800" id="totalTiketCount">0</h4>
+                                </div>
+                                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-ticket-alt text-blue-600 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-2xl p-6 shadow-lg card-hover">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-600 text-sm">Tiket Aktif</p>
+                                    <h4 class="text-3xl font-bold text-gray-800" id="activeTiketCount">0</h4>
+                                </div>
+                                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-2xl p-6 shadow-lg card-hover">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-600 text-sm">Total Pengeluaran</p>
+                                    <h4 class="text-3xl font-bold text-green-600" id="totalSpent">Rp 0</h4>
+                                </div>
+                                <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-wallet text-yellow-600 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-2xl p-6 shadow-lg card-hover">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-600 text-sm">Wisata Favorit</p>
+                                    <h4 class="text-3xl font-bold text-gray-800" id="favoriteCount">0</h4>
+                                </div>
+                                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-heart text-red-600 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Promo Section -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-2xl font-bold text-gray-800 flex items-center">
+                                <i class="fas fa-tags text-orange-500 mr-3"></i>
+                                Promo Spesial untuk Anda
+                            </h3>
+                            <button id="lihatSemuaPromo" class="text-blue-600 hover:text-blue-800 font-semibold">
+                                Lihat Semua <i class="fas fa-arrow-right ml-1"></i>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="promoWisata">
+                            <div class="text-center py-8">
+                                <div class="animate-pulse flex flex-col items-center">
+                                    <div class="w-3/4 h-32 bg-gray-200 rounded-xl mb-4"></div>
+                                    <div class="w-1/2 h-6 bg-gray-200 rounded mb-2"></div>
+                                    <div class="w-1/3 h-4 bg-gray-200 rounded"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity & Tickets -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                        <div class="bg-white rounded-2xl shadow-lg p-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                                <i class="fas fa-ticket-alt text-blue-500 mr-2"></i>
+                                Tiket Terbaru
+                            </h3>
+                            <div id="recentTiket">
+                                <div class="text-center py-8">
+                                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                                    <p class="text-gray-500 text-sm">Memuat tiket terbaru...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-2xl shadow-lg p-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                                <i class="fas fa-bell text-green-500 mr-2"></i>
+                                Aktivitas Terbaru
+                            </h3>
+                            <div id="recentActivities">
+                                <div class="text-center py-8">
+                                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-2"></div>
+                                    <p class="text-gray-500 text-sm">Memuat aktivitas...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Map & Nearby Wisata -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                        <div class="lg:col-span-2">
+                            <div class="bg-white rounded-2xl shadow-lg p-6">
+                                <h4 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                                    <i class="fas fa-map-marked-alt text-blue-500 mr-2"></i>
+                                    Peta Wisata Terdekat
+                                </h4>
+                                <div id="mapContainer">
+                                    <div id="map"></div>
+                                </div>
+                                <div class="mt-4 flex flex-wrap gap-4 text-sm">
+                                    <div class="flex items-center">
+                                        <div class="w-4 h-4 bg-red-500 rounded-full mr-2"></div>
+                                        <span class="text-gray-600">Lokasi Anda</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="w-4 h-4 bg-blue-500 rounded-full mr-2"></div>
+                                        <span class="text-gray-600">Wisata Lain</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="w-4 h-4 bg-green-500 rounded-full mr-2"></div>
+                                        <span class="text-gray-600">Wisata Terdekat</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-2xl shadow-lg p-6">
+                            <h4 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                                <i class="fas fa-map-marker-alt text-red-500 mr-2"></i>
+                                Wisata Terdekat
+                            </h4>
+                            <div class="space-y-4 max-h-96 overflow-y-auto pr-2" id="nearbyWisata">
+                                <div class="text-center py-4">
+                                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                                    <p class="text-gray-500 text-sm">Mencari wisata terdekat...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Weather Forecast -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-cloud-sun text-yellow-500 mr-3"></i>
+                            Prakiraan Cuaca di Destinasi Pilihan
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="weatherWisata">
+                            <div class="text-center py-4 col-span-full">
+                                <div class="animate-pulse flex flex-col items-center">
+                                    <div class="w-16 h-16 bg-gray-200 rounded-full mb-3"></div>
+                                    <div class="w-3/4 h-5 bg-gray-200 rounded mb-2"></div>
+                                    <div class="w-1/2 h-4 bg-gray-200 rounded"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">Aksi Cepat</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <button id="quickBuyTicket" class="bg-blue-600 text-white p-4 rounded-xl hover:bg-blue-700 transition flex flex-col items-center justify-center h-32">
+                                <i class="fas fa-ticket-alt text-3xl mb-2"></i>
+                                <span class="font-semibold text-lg">Beli Tiket</span>
+                            </button>
+                            <button id="quickExplore" class="bg-green-600 text-white p-4 rounded-xl hover:bg-green-700 transition flex flex-col items-center justify-center h-32">
+                                <i class="fas fa-umbrella-beach text-3xl mb-2"></i>
+                                <span class="font-semibold text-lg">Explore Wisata</span>
+                            </button>
+                            <button id="quickQRCode" class="bg-purple-600 text-white p-4 rounded-xl hover:bg-purple-700 transition flex flex-col items-center justify-center h-32">
+                                <i class="fas fa-qrcode text-3xl mb-2"></i>
+                                <span class="font-semibold text-lg">QR Code Saya</span>
+                            </button>
+                            <button id="quickRefresh" class="bg-orange-600 text-white p-4 rounded-xl hover:bg-orange-700 transition flex flex-col items-center justify-center h-32">
+                                <i class="fas fa-sync-alt text-3xl mb-2"></i>
+                                <span class="font-semibold text-lg">Refresh Lokasi</span>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section: Wisata -->
+                <section id="wisata" class="content-section">
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                            <h3 class="text-2xl font-bold text-gray-800 mb-4 md:mb-0">Daftar Destinasi Wisata</h3>
+                            <div class="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-4 w-full md:w-auto">
+                                <input type="text" id="searchWisata" placeholder="Cari wisata..." 
+                                       class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-auto">
+                                <select id="filterKategori" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-auto">
+                                    <option value="">Semua Kategori</option>
+                                    <option value="pantai">Pantai</option>
+                                    <option value="pulau">Pulau</option>
+                                    <option value="resort">Resort & Penginapan</option>
+                                    <option value="perairan">Perairan & Danau</option>
+                                </select>
+                                <select id="filterHarga" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-auto">
+                                    <option value="">Semua Harga</option>
+                                    <option value="0-50000">≤ Rp 50.000</option>
+                                    <option value="50000-200000">Rp 50.000 - 200.000</option>
+                                    <option value="200000-500000">Rp 200.000 - 500.000</option>
+                                    <option value="500000-1000000">Rp 500.000 - 1.000.000</option>
+                                    <option value="1000000-9999999">≥ Rp 1.000.000</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="wisataList">
+                            <div class="col-span-full text-center py-8">
+                                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                                <p class="text-gray-500 text-sm">Memuat daftar wisata...</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section: Favorit -->
+                <section id="favorit" class="content-section">
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6">Wisata Favorit Saya</h3>
+                        
+                        <div id="favoritContainer">
+                            <div class="text-center py-12 text-gray-500">
+                                <i class="fas fa-heart text-gray-300 text-5xl mb-4"></i>
+                                <p class="text-lg mb-2">Belum ada wisata favorit</p>
+                                <p class="text-sm mb-6">Tambahkan wisata ke favorit untuk mengaksesnya dengan mudah</p>
+                                <button id="exploreFavorit" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold">
+                                    <i class="fas fa-umbrella-beach mr-2"></i> Jelajahi Wisata
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section: Review -->
+                <section id="review" class="content-section">
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6">Review & Rating Saya</h3>
+                        
+                        <div id="reviewContainer">
+                            <div class="text-center py-12 text-gray-500">
+                                <i class="fas fa-star text-gray-300 text-5xl mb-4"></i>
+                                <p class="text-lg mb-2">Belum ada review</p>
+                                <p class="text-sm">Bagikan pengalaman Anda setelah mengunjungi wisata</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section: Bantuan -->
+                <section id="bantuan" class="content-section">
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6">Pusat Bantuan</h3>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div>
+                                <h4 class="text-xl font-bold mb-4">Pertanyaan Umum</h4>
+                                <div class="space-y-4" id="faqList">
+                                    <div class="border border-gray-200 rounded-lg p-4">
+                                        <h5 class="font-semibold text-gray-800 mb-2">Bagaimana cara memesan tiket?</h5>
+                                        <p class="text-gray-600 text-sm">Pilih wisata yang diinginkan, tentukan tanggal dan jumlah orang, lalu lakukan pembayaran.</p>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-4">
+                                        <h5 class="font-semibold text-gray-800 mb-2">Apa saja metode pembayaran yang tersedia?</h5>
+                                        <p class="text-gray-600 text-sm">Kami menerima transfer bank, QRIS, e-wallet, dan virtual account.</p>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-4">
+                                        <h5 class="font-semibold text-gray-800 mb-2">Bagaimana jika ingin membatalkan tiket?</h5>
+                                        <p class="text-gray-600 text-sm">Tiket dapat dibatalkan maksimal 24 jam sebelum tanggal kunjungan dengan biaya administrasi 10%.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 class="text-xl font-bold mb-4">Hubungi Kami</h4>
+                                <div class="bg-blue-50 rounded-xl p-6">
+                                    <p class="text-gray-700 mb-4">Butuh bantuan lebih lanjut? Hubungi tim support kami:</p>
+                                    
+                                    <div class="space-y-3">
+                                        <div class="flex items-center">
+                                            <i class="fas fa-phone text-blue-600 mr-3"></i>
+                                            <span>+62 21 1234 5678</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <i class="fas fa-envelope text-blue-600 mr-3"></i>
+                                            <span>support@bluewavebanten.my.id</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <i class="fas fa-clock text-blue-600 mr-3"></i>
+                                            <span>Senin - Minggu, 08:00 - 22:00 WIB</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <button id="liveChatButton" class="w-full mt-6 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-semibold">
+                                        <i class="fas fa-comments mr-2"></i> Mulai Live Chat
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section: Pembelian -->
+                <section id="pembelian" class="content-section">
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6">Pembelian Tiket</h3>
+                        
+                        <!-- Progress Steps -->
+                        <div class="flex justify-between items-center mb-8 relative">
+                            <div class="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-gray-200 z-0"></div>
+                            <div class="absolute left-0 h-1 bg-blue-600 z-10 transition-all duration-500" id="progressBar" style="width: 0%"></div>
+
+                            <div class="step-indicator active relative z-20 text-center flex-1" id="stepIndicator1">
+                                <div class="step-number w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-2 font-bold text-lg">1</div>
+                                <p class="text-sm font-semibold text-blue-600">Pilih Wisata</p>
+                            </div>
+                            <div class="step-indicator relative z-20 text-center flex-1" id="stepIndicator2">
+                                <div class="step-number w-10 h-10 bg-gray-300 text-white rounded-full flex items-center justify-center mx-auto mb-2 font-bold text-lg">2</div>
+                                <p class="text-sm text-gray-500">Detail Tiket</p>
+                            </div>
+                            <div class="step-indicator relative z-20 text-center flex-1" id="stepIndicator3">
+                                <div class="step-number w-10 h-10 bg-gray-300 text-white rounded-full flex items-center justify-center mx-auto mb-2 font-bold text-lg">3</div>
+                                <p class="text-sm text-gray-500">Pembayaran</p>
+                            </div>
+                            <div class="step-indicator relative z-20 text-center flex-1" id="stepIndicator4">
+                                <div class="step-number w-10 h-10 bg-gray-300 text-white rounded-full flex items-center justify-center mx-auto mb-2 font-bold text-lg">4</div>
+                                <p class="text-sm text-gray-500">Konfirmasi</p>
+                            </div>
+                        </div>
+
+                        <!-- Step 1: Pilih Wisata -->
+                        <div id="step1">
+                            <h4 class="text-xl font-bold mb-4">Pilih Destinasi Wisata</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="pilihWisataList">
+                                <div class="col-span-full text-center py-8">
+                                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                                    <p class="text-gray-500 text-sm">Memuat daftar wisata...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Detail Tiket -->
+                        <div id="step2" class="hidden">
+                            <h4 class="text-xl font-bold mb-4">Detail Tiket & Prakiraan Cuaca</h4>
+                            <div class="bg-gray-50 rounded-lg p-6 mb-6 shadow-inner">
+                                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 pb-4 border-b border-gray-200">
+                                    <div>
+                                        <h5 class="font-bold text-2xl mb-1" id="selectedWisataName">Nama Wisata</h5>
+                                        <p class="text-gray-600 text-lg" id="selectedWisataLocation">Lokasi</p>
+                                    </div>
+                                    <div class="text-right mt-4 md:mt-0">
+                                        <p class="text-sm text-gray-500">Harga Per Orang</p>
+                                        <span class="text-3xl font-bold text-blue-600" id="selectedWisataPrice">Rp 0</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                    <div>
+                                        <label for="tanggalBerangkat" class="block text-base font-medium text-gray-700 mb-2">Pilih Tanggal Berangkat</label>
+                                        <input type="date" id="tanggalBerangkat" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-base font-medium text-gray-700 mb-2">Jumlah Orang</label>
+                                        <div class="flex items-center space-x-3">
+                                            <button class="counter-btn w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-xl font-bold hover:bg-gray-300 transition" data-action="decrement">-</button>
+                                            <span id="jumlahOrangCount" class="px-6 py-2 border border-gray-300 rounded-lg text-lg font-semibold min-w-[60px] text-center">1</span>
+                                            <button class="counter-btn w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-xl font-bold hover:bg-gray-300 transition" data-action="increment">+</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex justify-between pt-4 border-t border-gray-200">
+                                    <button id="backToStep1" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition font-semibold">
+                                        <i class="fas fa-arrow-left mr-2"></i> Kembali
+                                    </button>
+                                    <button id="proceedToPayment" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold">
+                                        Lanjut ke Pembayaran <i class="fas fa-arrow-right ml-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Pembayaran -->
+                        <div id="step3" class="hidden">
+                            <h4 class="text-xl font-bold mb-4">Rincian & Metode Pembayaran</h4>
+                            <div class="bg-gray-50 rounded-lg p-6 mb-6 shadow-inner">
+                                <div class="mb-6 pb-4 border-b border-gray-200">
+                                    <h5 class="font-bold text-2xl mb-2" id="paymentWisataName">Nama Wisata</h5>
+                                    <p class="text-gray-700 text-lg" id="paymentWisataLocation">Lokasi</p>
+                                    <p class="text-gray-600 text-md" id="paymentWisataDate">Tanggal: -</p>
+                                    <p class="text-gray-600 text-md" id="paymentWisataPeople">Jumlah: - orang</p>
+                                </div>
+                                <div class="flex justify-between items-center mb-6">
+                                    <p class="text-xl font-bold text-gray-800">Total Pembayaran</p>
+                                    <span class="text-3xl font-bold text-blue-600" id="paymentTotalHarga">Rp 0</span>
+                                </div>
+                                
+                                <div class="mb-6">
+                                    <label class="block text-base font-medium text-gray-700 mb-3">Pilih Metode Pembayaran</label>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+                                        <div class="payment-method border border-gray-300 rounded-lg p-4 cursor-pointer hover:border-blue-400 transition" data-method="transfer">
+                                            <div class="flex items-center space-x-3">
+                                                <i class="fas fa-university text-blue-600 text-xl"></i>
+                                                <div>
+                                                    <p class="font-medium text-gray-800">Transfer Bank</p>
+                                                    <p class="text-sm text-gray-600">BNI, BRI, Mandiri</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="payment-method border border-gray-300 rounded-lg p-4 cursor-pointer hover:border-blue-400 transition" data-method="qris">
+                                            <div class="flex items-center space-x-3">
+                                                <i class="fas fa-qrcode text-green-600 text-xl"></i>
+                                                <div>
+                                                    <p class="font-medium text-gray-800">QRIS</p>
+                                                    <p class="text-sm text-gray-600">Semua e-wallet & Mobile Banking</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="payment-method border border-gray-300 rounded-lg p-4 cursor-pointer hover:border-blue-400 transition" data-method="ewallet">
+                                            <div class="flex items-center space-x-3">
+                                                <i class="fas fa-wallet text-purple-600 text-xl"></i>
+                                                <div>
+                                                    <p class="font-medium text-gray-800">E-Wallet</p>
+                                                    <p class="text-sm text-gray-600">Gopay, OVO, Dana, LinkAja</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex justify-between pt-4 border-t border-gray-200">
+                                    <button id="backToStep2" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition font-semibold">
+                                        <i class="fas fa-arrow-left mr-2"></i> Kembali
+                                    </button>
+                                    <button id="processPayment" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold">
+                                        Bayar Sekarang <i class="fas fa-credit-card ml-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                         <!-- Step 4: Konfirmasi -->
+                         <div id="step4" class="hidden">
+                            <h4 class="text-xl font-bold mb-4">Pembayaran Berhasil!</h4>
+                            <div class="bg-green-50 rounded-lg p-8 mb-6 text-center shadow-inner">
+                                <i class="fas fa-check-circle text-green-600 text-6xl mb-4"></i>
+                                <h5 class="font-bold text-3xl text-green-800 mb-2">Terima Kasih atas Pembelian Anda!</h5>
+                                <p class="text-lg text-green-700 mb-4">Tiket Anda berhasil dipesan dan sudah tersedia di halaman "Tiket Saya".</p>
+                                <div class="my-6 p-4 bg-white rounded-lg shadow-md inline-block">
+                                    <p class="text-gray-700 text-lg font-semibold">Kode Tiket Anda:</p>
+                                    <p class="text-blue-600 text-4xl font-extrabold" id="finalKodeTiket">BWXXXXXX</p>
+                                </div>
+                                <div class="flex justify-center space-x-4 mt-6">
+                                    <button id="lihatTiketSaya" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold">
+                                        <i class="fas fa-receipt mr-2"></i> Lihat Tiket Saya
+                                    </button>
+                                    <button id="kembaliBeranda" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-semibold">
+                                        <i class="fas fa-home mr-2"></i> Kembali ke Beranda
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section: Tiket Saya -->
+                <section id="tiket-saya" class="content-section">
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6">Tiket Saya</h3>
+                        
+                        <div class="flex flex-wrap gap-3 mb-6">
+                            <button class="filter-tiket px-5 py-2 bg-blue-600 text-white rounded-full font-semibold" data-status="all">
+                                Semua
+                            </button>
+                            <button class="filter-tiket px-5 py-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition font-semibold" data-status="active">
+                                Belum Digunakan
+                            </button>
+                            <button class="filter-tiket px-5 py-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition font-semibold" data-status="used">
+                                Sudah Digunakan
+                            </button>
+                        </div>
+                        
+                        <div id="daftarTiket" class="space-y-6">
+                            <div class="text-center py-8">
+                                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                                <p class="text-gray-500 text-sm">Memuat tiket Anda...</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section: Riwayat -->
+                <section id="riwayat" class="content-section">
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6">Riwayat Transaksi</h3>
+                        
+                        <div class="flex flex-wrap gap-3 mb-6">
+                            <button class="filter-riwayat-status px-5 py-2 bg-blue-600 text-white rounded-full font-semibold" data-status="all">
+                                Semua
+                            </button>
+                            <button class="filter-riwayat-status px-5 py-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition font-semibold" data-status="success">
+                                Sukses
+                            </button>
+                            <button class="filter-riwayat-status px-5 py-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition font-semibold" data-status="pending">
+                                Pending
+                            </button>
+                            <button class="filter-riwayat-status px-5 py-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition font-semibold" data-status="failed">
+                                Gagal
+                            </button>
+                        </div>
+                        
+                        <div id="riwayatTransaksi" class="space-y-4">
+                            <div class="text-center py-8">
+                                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                                <p class="text-gray-500 text-sm">Memuat riwayat transaksi...</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section: Profil -->
+                <section id="profil" class="content-section">
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6">Profil Saya</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <div class="md:col-span-1">
+                                <div class="text-center">
+                                    <div class="relative inline-block mb-4">
+                                        <div class="w-32 h-32 bg-blue-600 rounded-full flex items-center justify-center text-white text-4xl font-bold mx-auto mb-4 overflow-hidden" id="profileAvatar">
+                                            U
+                                        </div>
+                                        <input type="file" id="avatarInput" class="hidden" accept="image/*">
+                                        <button id="changeAvatar" class="absolute bottom-2 right-2 w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition shadow-md">
+                                            <i class="fas fa-camera text-lg"></i>
+                                        </button>
+                                    </div>
+                                    <h4 class="text-xl font-bold mb-1" id="profileName">User Name</h4>
+                                    <p class="text-gray-600" id="profileEmail">user@bluewave.com</p>
+                                </div>
+                            </div>
+                            <div class="md:col-span-2">
+                                <form id="profileForm">
+                                    <div class="space-y-5">
+                                        <div>
+                                            <label for="inputNama" class="block text-base font-medium text-gray-700 mb-2">Nama Lengkap</label>
+                                            <input type="text" id="inputNama" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="User Demo">
+                                        </div>
+                                        <div>
+                                            <label for="inputEmail" class="block text-base font-medium text-gray-700 mb-2">Email</label>
+                                            <input type="email" id="inputEmail" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="user@bluewave.com" readonly>
+                                        </div>
+                                        <div>
+                                            <label for="inputTelepon" class="block text-base font-medium text-gray-700 mb-2">Nomor Telepon</label>
+                                            <input type="tel" id="inputTelepon" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="08123456789">
+                                        </div>
+                                        <div>
+                                            <label for="inputAlamat" class="block text-base font-medium text-gray-700 mb-2">Alamat</label>
+                                            <textarea id="inputAlamat" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3">Jl. Contoh Alamat No. 123</textarea>
+                                        </div>
+                                        
+                                        <div class="flex space-x-3 pt-4">
+                                            <button type="submit" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold">
+                                                <i class="fas fa-save mr-2"></i> Simpan Perubahan
+                                            </button>
+                                            <button type="button" id="resetProfile" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-semibold">
+                                                <i class="fas fa-undo mr-2"></i> Reset
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div id="qrModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl relative">
+            <button id="closeQrModal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl transition">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="text-center">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">Tiket Anda Siap!</h3>
+                <p class="text-gray-600 mb-6">Tunjukkan QR code ini saat masuk ke lokasi wisata.</p>
+                <div class="qr-code mb-6 border border-gray-200 shadow-md p-4 rounded-lg" id="qrCodeContainer">
+                    <div class="text-center text-gray-500">QR Code akan muncul di sini</div>
+                </div>
+                <p class="font-semibold text-2xl text-blue-600 mb-2" id="qrTiketCode">BW0012301</p>
+                <p class="text-gray-700 text-lg mb-4" id="qrTiketInfo">Pulau Panjang • 2 orang</p>
+                <div class="bg-blue-50 border border-blue-200 text-blue-800 rounded-lg p-3 text-sm">
+                    <i class="fas fa-info-circle mr-2"></i> Mohon persiapkan tiket ini sebelum tiba di lokasi.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Files -->
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/user.js"></script>
+    
+    <script>
+// Redirect otomatis ke login jika belum login
+document.addEventListener('DOMContentLoaded', function() {
+    const user = localStorage.getItem('user');
+    const token = localStorage.getItem('auth_token');
+    
+    // Jika tidak ada user/token, redirect ke login
+    if (!user || !token) {
+        // Cek apakah sudah di halaman login/register
+        const currentPage = window.location.pathname;
+        if (!currentPage.includes('login.html') && !currentPage.includes('register.html')) {
+            window.location.href = 'login.html';
+        }
+    } else {
+        // Jika sudah login dan di halaman login/register, redirect ke dashboard
+        if (currentPage.includes('login.html') || currentPage.includes('register.html')) {
+            window.location.href = 'index.html';
+        }
+    }
+});
+</script>
+    
+</body>
+</html>

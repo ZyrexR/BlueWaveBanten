@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar - BlueWave Banten</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body class="flex items-center justify-center p-4 auth-bg">
+    <div class="auth-card rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+        <a href="login.html" class="absolute top-4 left-4 z-10 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full w-10 h-10 flex items-center justify-center transition-all shadow-md">
+            <i class="fas fa-arrow-left text-blue-700"></i>
+        </a>
+
+        <div class="p-8">
+            <div class="text-center mb-8">
+                <div class="flex justify-center items-center space-x-3">
+                    <img src="https://www.bluewavebanten.my.id/assets/images/logo_bluewave.png" alt="Logo BlueWave Banten" class="w-16 h-16">
+                    <div>
+                        <h1 class="text-xl font-bold text-blue-700">BlueWave Banten</h1>
+                        <p class="text-xs text-gray-600">Destinasi Wisata Bahari</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="text-2xl font-bold text-gray-800 text-center mb-2">Buat Akun Baru</h2>
+            <p class="text-gray-600 text-center mb-6">Isi data diri Anda</p>
+
+            <form id="registerForm" class="space-y-4">
+                <div>
+                    <label for="nama" class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                    <input type="text" id="nama" name="nama" required 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" 
+                           placeholder="Masukkan nama lengkap">
+                </div>
+
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" id="email" name="email" required 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" 
+                           placeholder="Masukkan email Anda">
+                </div>
+
+                <div>
+                    <label for="telepon" class="block text-sm font-medium text-gray-700 mb-1">Nomor Telepon</label>
+                    <input type="tel" id="telepon" name="telepon"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" 
+                           placeholder="08123456789">
+                </div>
+
+                <div>
+                    <label for="alamat" class="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
+                    <textarea id="alamat" name="alamat" rows="3"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" 
+                              placeholder="Masukkan alamat lengkap"></textarea>
+                </div>
+                
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <div class="relative">
+                        <input type="password" id="password" name="password" required 
+                               class="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" 
+                               placeholder="Masukkan password (min. 6 karakter)"
+                               minlength="6">
+                        <button type="button" id="togglePassword" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1">Konfirmasi Password</label>
+                    <div class="relative">
+                        <input type="password" id="confirmPassword" name="confirmPassword" required 
+                               class="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" 
+                               placeholder="Ketik ulang password Anda">
+                        <button type="button" id="toggleConfirmPassword" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" id="registerBtn" class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition flex items-center justify-center hover:bg-blue-700 shadow-lg disabled:opacity-50">
+                    <i class="fas fa-user-plus mr-2"></i>
+                    <span id="btnText">Buat Akun</span>
+                    <div id="btnLoading" class="hidden animate-spin rounded-full h-4 w-4 border-b-2 border-white ml-2"></div>
+                </button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <p class="text-gray-600 text-sm">Sudah punya akun? 
+                    <a href="login.html" class="text-blue-600 hover:text-blue-800 font-semibold">Masuk di sini</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/auth.js"></script>
+</body>
+</html>
